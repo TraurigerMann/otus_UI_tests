@@ -27,7 +27,6 @@ def base_url(request):
 @pytest.fixture
 def browser(request):
     browser = request.config.getoption("--browser")
-    # driver = request.config.getoption("--drivers")
 
     if browser == "chrome":
         service = Service()
