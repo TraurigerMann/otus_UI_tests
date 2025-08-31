@@ -2,37 +2,24 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-
-def test_price_is_visible(browser, base_url):
-    browser.get(f"{base_url}/product/desktops/mac/imac")
-    wait = WebDriverWait(browser, 2, poll_frequency=1)
-
-    wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".price-new")))
+from page_objects.product_page import ProductPage
 
 
-def test_add_to_cart_btn_is_visible(browser, base_url):
-    browser.get(f"{base_url}/product/desktops/mac/macbook")
-    wait = WebDriverWait(browser, 2, poll_frequency=1)
-
-    wait.until(EC.visibility_of_element_located((By.XPATH, "//button[contains(@id, 'button-cart')]")))
+def test_price_is_visible(browser):
+    ProductPage(browser).get_price()
 
 
-def test_specification_tab_is_visible(browser, base_url):
-    browser.get(f"{base_url}/product/desktops/mac/macbook")
-    wait = WebDriverWait(browser, 2, poll_frequency=1)
-
-    wait.until(EC.visibility_of_element_located((By.XPATH, "//a[contains(@href, '#tab-specification')]")))
+def test_add_to_cart_btn_is_visible(browser):
+    ProductPage(browser).get_add_to_cart_btn()
 
 
-def test_btn_add_to_wish_list_is_visible(browser, base_url):
-    browser.get(f"{base_url}/product/desktops/mac/macbook")
-    wait = WebDriverWait(browser, 2, poll_frequency=1)
-
-    wait.until(EC.visibility_of_element_located((By.XPATH, "//button[contains(@title, 'Add to Wish List')]")))
+def test_review_tab_is_visible(browser):
+    ProductPage(browser).scroll_to_review_tab()
 
 
-def test_main_image_is_visible(browser, base_url):
-    browser.get(f"{base_url}/product/desktops/mac/macbook")
-    wait = WebDriverWait(browser, 2, poll_frequency=1)
+def test_btn_add_to_wish_list_is_visible(browser):
+    ProductPage(browser).get_add_to_wish_list_btn()
 
-    wait.until(EC.visibility_of_element_located((By.XPATH, "//img[contains(@title, 'MacBook')]")))
+
+def test_main_image_is_visible(browser):
+    ProductPage(browser).get_main_image()
