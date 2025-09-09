@@ -7,10 +7,6 @@ faker = Faker()
 
 
 class RegistrationPage(BasePage):
-    FIRSTNAME = faker.first_name()
-    LASTNAME = faker.last_name()
-    EMAIL = faker.email()
-    PASSWORD = faker.password()
 
 
     def __init__(self, browser):
@@ -27,23 +23,23 @@ class RegistrationPage(BasePage):
         self.get_clickable_element((By.XPATH, "//*[contains(text(),'Continue')]"))
 
 
-    def write_first_name(self):
-        self.input_value((By.XPATH, "//input[@name='firstname']"), self.FIRSTNAME)
+    def write_first_name(self, name=faker.first_name()):
+        self.input_value((By.XPATH, "//input[@name='firstname']"), name)
         return self
 
 
-    def write_last_name(self):
-        self.input_value((By.XPATH, "//input[@name='lastname']"), self.LASTNAME)
+    def write_last_name(self, last_name=faker.lastq_name()):
+        self.input_value((By.XPATH, "//input[@name='lastname']"), last_name)
         return self
 
 
-    def write_email(self):
-        self.input_value((By.XPATH, "//input[@name='email']"), self.EMAIL)
+    def write_email(self, email=faker.email()):
+        self.input_value((By.XPATH, "//input[@name='email']"), email)
         return self
 
 
-    def write_password(self):
-        self.input_value((By.XPATH, "//input[@name='password']"), self.PASSWORD)
+    def write_password(self, password=faker.passwoed()):
+        self.input_value((By.XPATH, "//input[@name='password']"), password)
         return self
 
 
