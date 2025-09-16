@@ -1,3 +1,5 @@
+import allure
+
 from page_objects.administation_login_page import AdminLoginPage
 from page_objects.administration_page import AdminPage
 from page_objects.alert_element import AlertSuccessElement
@@ -10,6 +12,8 @@ MODEL_NAME = "Model one"
 SEO_URL = "abc-124"
 
 
+@allure.feature("Продукт")
+@allure.title("Добавление нового продукта")
 def test_add_new_product(browser, product_cleanup):
 
     AdminLoginPage(browser) \
@@ -31,6 +35,8 @@ def test_add_new_product(browser, product_cleanup):
     product_cleanup(PRODUCT_NAME)
 
 
+@allure.feature("Продукт")
+@allure.title("Удаление продукта")
 def test_delete_product(browser, product_create):
 
     product_create(ADMIN_LOGIN, ADMIN_PASSWORD, PRODUCT_NAME, TAG, MODEL_NAME, SEO_URL)

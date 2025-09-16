@@ -1,3 +1,4 @@
+import allure
 from selenium.webdriver.common.by import By
 
 import random
@@ -14,15 +15,19 @@ class HomePage(BasePage):
         self.open_home_page()
 
 
+    @allure.step("Open home page")
     def open_home_page(self):
         self.browser.get(f"{self.base_url}/home")
+        self.logger.info("Opened home page")
         return self
 
 
+    @allure.step("See logo")
     def get_logo(self):
         self.get_element((By.ID, "logo"))
 
 
+    @allure.step("See add to cart button")
     def get_add_to_cart_btn(self):
         self.get_element((
         By.XPATH,
@@ -30,18 +35,22 @@ class HomePage(BasePage):
     ))
 
 
+    @allure.step("See cart button")
     def get_cart_btn(self):
         self.get_element((By.XPATH, "//div[contains(@id, 'header-cart')]/descendant::button"))
 
 
+    @allure.step("See search button")
     def get_search_btn(self):
         self.get_element((By.XPATH, "//div[contains(@id, 'search')]/descendant::button"))
 
 
+    @allure.step("See products list")
     def get_products_list(self):
         return len(self.get_elements((By.XPATH, "//*[@class='col mb-3']")))
 
 
+    @allure.step("Get random product number")
     def get_random_product_number(self):
         self.random_product_num = random.randint(1, self.get_products_list())
         return self

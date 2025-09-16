@@ -1,4 +1,9 @@
+import logging
+import os
 import pytest
+import allure
+
+from datetime import datetime
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -19,26 +24,38 @@ def pytest_addoption(parser):
         default="http://localhost:8081/",
         help="This is base url of OpenCart service",
     )
+    parser.addoption(
+        "--logging_state",
+        default="False",
+        help="State of logging service: True = enabled; False = disabled",
+    )
 
 
 @pytest.fixture
 def browser(request):
     browser = request.config.getoption("--browser")
     url = request.config.getoption("--base_url")
+    logging_state = request.config.getoption("--logging_state")
 
     if browser == "chrome":
         service = Service()
         driver = webdriver.Chrome(service=service)
     elif browser == "firefox":
         driver = webdriver.Firefox()
+    else:
+        raise ValueError(f"Unsupported browser: {browser}")
+
+    driver.test_name = request.node.name
+    driver.test_page = os.path.splitext(os.path.basename(str(request.node.fspath)))[0]
+    driver.log_level = logging.DEBUG
 
     def teardown():
         driver.quit()
-
+    
     request.addfinalizer(teardown)
 
 
-    return driver, url
+    return driver, url, logging_state
 
 
 @pytest.fixture

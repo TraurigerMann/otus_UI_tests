@@ -1,3 +1,8 @@
+import logging
+import os
+
+import allure
+from selenium.common.exceptions import TimeoutException 
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
@@ -6,7 +11,23 @@ from selenium.webdriver.common.action_chains import ActionChains
 class BasePage:
 
     def __init__(self, browser):
-        self.browser, self.base_url = browser
+        self.browser, self.base_url, self.logging_state = browser
+        self._config_logger()
+
+
+    def _config_logger(self):
+        self.logger = logging.getLogger(type(self).__name__)
+        if self.logging_state:
+            os.makedirs("logs", exist_ok=True)
+            module_logs_dir = os.path.join("logs", str(self.browser.test_page))
+            os.makedirs(module_logs_dir, exist_ok=True)
+            file_path = os.path.join(module_logs_dir, f"{self.browser.test_name}.log")
+            file_handler = logging.FileHandler(file_path, mode='w', encoding='utf-8')
+            file_handler.setFormatter(
+                logging.Formatter('%(asctime)s - %(name)s - [%(levelname)s]: %(message)s')
+                )
+            self.logger.addHandler(file_handler)
+        self.logger.setLevel(level=self.browser.log_level)
 
 
     def _text_xpath(self, text):
@@ -14,11 +35,41 @@ class BasePage:
 
 
     def get_element(self, locator: tuple, timeout = 3):
-        return WebDriverWait(self.browser, timeout).until(EC.visibility_of_element_located(locator))
+        try: 
+            return WebDriverWait(self.browser, timeout).until(EC.visibility_of_element_located(locator))
+        except TimeoutException:
+            allure.attach(
+            name=f"screenshot_{self.browser.test_name}",
+            body=self.browser.get_screenshot_as_png(),
+            attachment_type=allure.attachment_type.PNG
+            )
+            allure.attach(
+                name=f"page_source_{self.browser.test_name}",
+                body=self.browser.page_source,
+                attachment_type=allure.attachment_type.HTML
+            )
+            self.logger.error(f"Element {locator} not found")
+            raise AssertionError(f"Element {locator} not found")
+        
+
 
 
     def get_elements(self, locator: tuple, timeout = 3):
-        return WebDriverWait(self.browser, timeout).until(EC.visibility_of_all_elements_located(locator))
+        try: 
+            return WebDriverWait(self.browser, timeout).until(EC.visibility_of_all_elements_located(locator))
+        except TimeoutException:
+            allure.attach(
+            name=f"screenshot_{self.browser.test_name}",
+            body=self.browser.get_screenshot_as_png(),
+            attachment_type=allure.attachment_type.PNG
+            )
+            allure.attach(
+                name=f"page_source_{self.browser.test_name}",
+                body=self.browser.page_source,
+                attachment_type=allure.attachment_type.HTML
+            )
+            self.logger.error(f"Element {locator} not found")
+            raise AssertionError(f"Element {locator} not found")
 
 
     def get_clickable_element(self, locator: tuple, timeout = 3):
@@ -26,11 +77,13 @@ class BasePage:
 
 
     def click(self, locator: tuple):
+        self.logger.info(f"Clicked on {locator}")
         ActionChains(self.browser).move_to_element(self.get_element(locator)).pause(0.4).click().perform()
         return self
-
+    
 
     def input_value(self, locator: tuple, text: str):
+        self.logger.info(f"Input text: '{text}' into {locator}")
         self.get_element(locator).click()
         self.get_element(locator).clear()
 
@@ -39,10 +92,12 @@ class BasePage:
 
 
     def scroll(self, locator: tuple):
+        self.logger.info(f"Scrolled to {locator}")
         ActionChains(self.browser).scroll_to_element(self.get_element(locator)).perform()
 
 
     def alert_accept(self, timeout = 3):
+        self.logger.info("Alert success shown")
         WebDriverWait(self.browser, timeout).until(EC.alert_is_present()).accept()
 
 

@@ -1,6 +1,11 @@
 # Custom
 .idea/
 .DS_Store
+pytest.ini
+.ruff_cache
+logs
+allure-results
+allure-report
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
