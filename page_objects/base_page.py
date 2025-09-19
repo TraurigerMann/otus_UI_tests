@@ -1,8 +1,6 @@
 import logging
 import os
 
-import allure
-from selenium.common.exceptions import TimeoutException 
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
@@ -35,41 +33,12 @@ class BasePage:
 
 
     def get_element(self, locator: tuple, timeout = 3):
-        try: 
-            return WebDriverWait(self.browser, timeout).until(EC.visibility_of_element_located(locator))
-        except TimeoutException:
-            allure.attach(
-            name=f"screenshot_{self.browser.test_name}",
-            body=self.browser.get_screenshot_as_png(),
-            attachment_type=allure.attachment_type.PNG
-            )
-            allure.attach(
-                name=f"page_source_{self.browser.test_name}",
-                body=self.browser.page_source,
-                attachment_type=allure.attachment_type.HTML
-            )
-            self.logger.error(f"Element {locator} not found")
-            raise AssertionError(f"Element {locator} not found")
+        return WebDriverWait(self.browser, timeout).until(EC.visibility_of_element_located(locator))
         
 
 
-
     def get_elements(self, locator: tuple, timeout = 3):
-        try: 
-            return WebDriverWait(self.browser, timeout).until(EC.visibility_of_all_elements_located(locator))
-        except TimeoutException:
-            allure.attach(
-            name=f"screenshot_{self.browser.test_name}",
-            body=self.browser.get_screenshot_as_png(),
-            attachment_type=allure.attachment_type.PNG
-            )
-            allure.attach(
-                name=f"page_source_{self.browser.test_name}",
-                body=self.browser.page_source,
-                attachment_type=allure.attachment_type.HTML
-            )
-            self.logger.error(f"Element {locator} not found")
-            raise AssertionError(f"Element {locator} not found")
+        return WebDriverWait(self.browser, timeout).until(EC.visibility_of_all_elements_located(locator))
 
 
     def get_clickable_element(self, locator: tuple, timeout = 3):

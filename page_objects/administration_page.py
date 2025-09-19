@@ -106,7 +106,7 @@ class AdminPage(BasePage):
         return self
 
 
-    @allure.step(f"Scroll to meta tag")
+    @allure.step("Scroll to meta tag")
     def scroll_to_meta_tag_input(self):
         self.scroll((By.XPATH, "//*[contains(@name, 'product_description[1][meta_title]')]"))
         return self

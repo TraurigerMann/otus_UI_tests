@@ -3,8 +3,6 @@ import os
 import pytest
 import allure
 
-from datetime import datetime
-
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 
@@ -31,11 +29,16 @@ def pytest_addoption(parser):
     )
 
 
+@pytest.fixture(scope="session", autouse=True)
+def logging_state(request):
+    check_logging_state = request.config.getoption("--logging_state")
+    return check_logging_state
+
+
 @pytest.fixture
-def browser(request):
+def browser(request, logging_state):
     browser = request.config.getoption("--browser")
     url = request.config.getoption("--base_url")
-    logging_state = request.config.getoption("--logging_state")
 
     if browser == "chrome":
         service = Service()
@@ -54,8 +57,36 @@ def browser(request):
     
     request.addfinalizer(teardown)
 
-
     return driver, url, logging_state
+
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    rep = outcome.get_result()
+    
+    if rep.when == "call" and rep.failed and 'browser' in item.funcargs:
+        try:
+            browser_obj = item.funcargs['browser']
+            
+            if isinstance(browser_obj, tuple):
+                browser = browser_obj[0]
+            else:
+                browser = browser_obj
+            
+            allure.attach(
+                body=browser.get_screenshot_as_png(),
+                name=f"screenshot_{browser.test_name}",
+                attachment_type=allure.attachment_type.PNG
+            )
+            allure.attach(
+                body=browser.page_source,
+                name=f"page_source_{browser.test_name}",
+                attachment_type=allure.attachment_type.HTML
+            )
+            
+        except Exception as e:
+            print(f"Ошибка при создании скриншота: {e}")
 
 
 @pytest.fixture
