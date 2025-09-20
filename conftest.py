@@ -31,8 +31,12 @@ def pytest_addoption(parser):
 
 @pytest.fixture(scope="session", autouse=True)
 def logging_state(request):
-    check_logging_state = request.config.getoption("--logging_state")
-    return check_logging_state
+    logging_state_opt = request.config.getoption("--logging_state")
+    if logging_state_opt == "True":
+        return True
+    else:
+        return False
+
 
 
 @pytest.fixture
