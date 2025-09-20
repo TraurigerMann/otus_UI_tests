@@ -1,6 +1,13 @@
 # Custom
 .idea/
 .DS_Store
+pytest.ini
+.ruff_cache
+logs
+allure-results
+allure-report
+docker-compose.yml
+.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

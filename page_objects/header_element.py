@@ -1,3 +1,5 @@
+import allure
+
 from selenium.webdriver.common.by import By
 
 from page_objects.base_page import BasePage
@@ -9,10 +11,14 @@ class HeaderElement(BasePage):
     def _get_current_currency(self):
         return self.get_element((By.XPATH, "//*[contains(@class, 'float-start')]//strong")).text
 
+
+    @allure.step("Click on currency dropdown")
     def click_currency_dropdown(self):
         self.click((By.XPATH, "//*[contains(@class, 'float-start')]//form"))
         return self
 
+    
+    @allure.step("Set new currency")
     def set_new_currency(self):
         currency = ["€", "$", "£"]
 

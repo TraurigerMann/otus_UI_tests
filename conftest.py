@@ -1,4 +1,7 @@
+import logging
+import os
 import pytest
+import allure
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -19,10 +22,25 @@ def pytest_addoption(parser):
         default="http://localhost:8081/",
         help="This is base url of OpenCart service",
     )
+    parser.addoption(
+        "--logging_state",
+        default="False",
+        help="State of logging service: True = enabled; False = disabled",
+    )
+
+
+@pytest.fixture(scope="session", autouse=True)
+def logging_state(request):
+    logging_state_opt = request.config.getoption("--logging_state")
+    if logging_state_opt == "True":
+        return True
+    else:
+        return False
+
 
 
 @pytest.fixture
-def browser(request):
+def browser(request, logging_state):
     browser = request.config.getoption("--browser")
     url = request.config.getoption("--base_url")
 
@@ -31,14 +49,48 @@ def browser(request):
         driver = webdriver.Chrome(service=service)
     elif browser == "firefox":
         driver = webdriver.Firefox()
+    else:
+        raise ValueError(f"Unsupported browser: {browser}")
+
+    driver.test_name = request.node.name
+    driver.test_page = os.path.splitext(os.path.basename(str(request.node.fspath)))[0]
+    driver.log_level = logging.DEBUG
 
     def teardown():
         driver.quit()
-
+    
     request.addfinalizer(teardown)
 
+    return driver, url, logging_state
 
-    return driver, url
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    rep = outcome.get_result()
+    
+    if rep.when == "call" and rep.failed and 'browser' in item.funcargs:
+        try:
+            browser_obj = item.funcargs['browser']
+            
+            if isinstance(browser_obj, tuple):
+                browser = browser_obj[0]
+            else:
+                browser = browser_obj
+            
+            allure.attach(
+                body=browser.get_screenshot_as_png(),
+                name=f"screenshot_{browser.test_name}",
+                attachment_type=allure.attachment_type.PNG
+            )
+            allure.attach(
+                body=browser.page_source,
+                name=f"page_source_{browser.test_name}",
+                attachment_type=allure.attachment_type.HTML
+            )
+            
+        except Exception as e:
+            print(f"Ошибка при создании скриншота: {e}")
 
 
 @pytest.fixture
